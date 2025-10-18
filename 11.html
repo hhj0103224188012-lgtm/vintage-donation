@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>빈티지 기부</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ✅ 아임포트 결제 스크립트 -->
+  <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+  <style>
+    :root { --accent:#0ea5e9; }
+    .card { transition:transform .2s ease, box-shadow .2s ease; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+  <!-- Header -->
+  <header class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="1.html" class="flex items-center gap-2">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white font-bold">V</span>
+        <span class="font-extrabold tracking-tight text-xl">빈티지 기부</span>
+      </a>
+      <button id="btnCart" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">🛒 장바구니</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-4 py-16 text-center">
+    <h1 class="text-4xl font-black">당신의 옷이 <span class="text-[var(--accent)]">희망</span>이 됩니다</h1>
+    <p class="mt-3 text-slate-600">기부받은 빈티지 옷을 판매하고 수익의 70%를 사회에 환원합니다.</p>
+  </section>
+
+  <!-- 상품 -->
+  <section id="shop" class="py-10 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-6">상품 미리보기</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card bg-white border border-slate-200 rounded-2xl p-3 text-center">
+          <img src="퓨마_가방-removebg-preview.png" alt="PUMA 데이팩 백팩" class="w-full h-48 object-contain mb-2">
+          <h3 class="font-semibold">PUMA 데이팩 백팩</h3>
+          <p class="text-slate-600">₩27,000</p>
+          <button id="addToCart" class="mt-2 w-full py-2 rounded-lg bg-[var(--accent)] text-white hover:opacity-90">장바구니 담기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 장바구니 -->
+  <div id="cartDrawerBackdrop" class="fixed inset-0 bg-black/40 hidden z-40"></div>
+  <aside id="cartDrawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 z-50 transform translate-x-full transition-transform duration-200">
+    <div class="h-full flex flex-col">
+      <header class="flex justify-between items-center p-4 border-b border-slate-200">
+        <h3 class="font-bold">장바구니</h3>
+        <button id="cartClose" class="px-3 py-1 border border-slate-200 rounded-lg hover:bg-slate-50">닫기 ✕</button>
+      </header>
+      <div id="cartItems" class="flex-1 p-4 space-y-3 overflow-y-auto"></div>
+      <footer class="p-4 border-t border-slate-200">
+        <div class="flex justify-between mb-3">
+          <span class="text-slate-600">합계</span>
+          <strong id="cartTotal" class="text-lg">₩0</strong>
+        </div>
+        <button id="checkoutButton" class="w-full px-4 py-2 rounded-lg bg-[var(--accent)] text-white hover:opacity-90 disabled:opacity-40" disabled>결제하기</button>
+      </footer>
+    </div>
+  </aside>
+
+  <script>
+    // ===========================
+    // 장바구니 데이터
+    // ===========================
+    const cartDrawer = document.getElementById('cartDrawer');
+    const cartBackdrop = document.getElementById('cartDrawerBackdrop');
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const checkoutButton = document.getElementById('checkoutButton');
+
+    let cart = [];
+
+    function openCart() {
+      cartDrawer.classList.remove('translate-x-full');
+      cartBackdrop.classList.remove('hidden');
+    }
+
+    function closeCart() {
+      cartDrawer.classList.add('translate-x-full');
+      cartBackdrop.classList.add('hidden');
+    }
+
+    function renderCart() {
+      if (cart.length === 0) {
+        cartItems.innerHTML = `<p class="text-center text-slate-500 py-10">장바구니가 비어 있습니다.</p>`;
+        cartTotal.textContent = '₩0';
+        checkoutButton.disabled = true;
+        return;
+      }
+      checkoutButton.disabled = false;
+      cartItems.innerHTML = cart.map(item => `
+        <div class="flex justify-between items-center border border-slate-200 rounded-lg p-3">
+          <div>
+            <div class="font-semibold">${item.name}</div>
+            <div class="text-sm text-slate-500">₩${item.price.toLocaleString()}</div>
+          </div>
+          <button onclick="removeItem('${item.id}')" class="text-red-500">삭제</button>
+        </div>
+      `).join('');
+      const total = cart.reduce((sum, i) => sum + i.price, 0);
+      cartTotal.textContent = '₩' + total.toLocaleString();
+    }
+
+    function addToCart() {
+      const item = { id: 'puma01', name: 'PUMA 데이팩 백팩', price: 27000 };
+      cart.push(item);
+      renderCart();
+      openCart();
+    }
+
+    function removeItem(id) {
+      cart = cart.filter(i => i.id !== id);
+      renderCart();
+    }
+
+    document.getElementById('btnCart').addEventListener('click', openCart);
+    document.getElementById('cartClose').addEventListener('click', closeCart);
+    cartBackdrop.addEventListener('click', closeCart);
+    document.getElementById('addToCart').addEventListener('click', addToCart);
+
+    // ===========================
+    // ✅ 아임포트 결제 (테스트용)
+    // ===========================
+    const IMP = window.IMP;
+    IMP.init("imp10391932"); // 테스트용 가맹점 코드
+
+    checkoutButton.addEventListener('click', () => {
+      if (cart.length === 0) return alert("장바구니가 비어 있습니다.");
+      const total = cart.reduce((sum, i) => sum + i.price, 0);
+
+      IMP.request_pay({
+        pg: "html5_inicis.INIpayTest", // ✅ 테스트 PG
+        pay_method: "card",
+        merchant_uid: "mid_" + new Date().getTime(),
+        name: "빈티지 기부 상품결제",
+        amount: total,
+        buyer_email: "test@example.com",
+        buyer_name: "홍길동",
+        buyer_tel: "010-1234-5678",
+        buyer_addr: "서울특별시 강남구 테헤란로 123",
+        buyer_postcode: "06236"
+      }, function(rsp) {
+        if (rsp.success) {
+          alert("✅ 결제 성공!\n고유ID: " + rsp.imp_uid + "\n결제금액: " + rsp.paid_amount.toLocaleString() + "원");
+          cart = [];
+          renderCart();
+        } else {
+          alert("❌ 결제 실패: " + rsp.error_msg);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

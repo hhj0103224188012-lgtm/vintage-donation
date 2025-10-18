@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>빈티지 기부</title>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PortOne(Iamport) JS SDK -->
+  <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+  <style>
+    :root { --accent:#0ea5e9; }
+    .cat-btn { border:1px solid rgb(226 232 240); }
+    .cat-btn.active { background:var(--accent); color:#fff; border-color:transparent; }
+    .grid-auto { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
+    .card { transition:transform .2s ease, box-shadow .2s ease; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+    .drawer-enter { transform: translateX(100%); }
+    .drawer-open { transform: translateX(0); }
+    .input { border:1px solid rgb(203 213 225); }
+    .link { color: var(--accent); }
+    .link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 justify-between">
+      <a href="1.html" class="flex items-center gap-2">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white font-bold">V</span>
+        <span class="font-extrabold tracking-tight text-xl">빈티지 기부</span>
+      </a>
+
+      <div class="flex-1 hidden md:block">
+        <label class="sr-only" for="search">검색</label>
+        <div class="relative">
+          <input id="search" type="search" placeholder="상품명·카테고리 검색 (예: 상의, 데님, 자켓)"
+                 class="w-full rounded-xl input px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-sky-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-2.5 h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
+          </svg>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex flex-col gap-1 text-sm items-end">
+        <div class="flex gap-2">
+          <a href="#how" class="px-3 py-1.5 rounded-lg hover:bg-slate-100">운영 방식</a>
+          <a href="#shop" class="px-3 py-1.5 rounded-lg hover:bg-slate-100">상품</a>
+          <a href="#donate" class="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white hover:opacity-90">옷 기부하기</a>
+          <a href="2.html" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">기부현황 보기</a>
+        </div>
+        <div class="flex gap-2">
+          <button id="btnLogin" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">로그인</button>
+          <button id="btnSignup" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">회원가입</button>
+          <div id="userBox" class="hidden items-center gap-2">
+            <span id="helloUser" class="text-slate-600"></span>
+            <button id="btnLogout" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">로그아웃</button>
+          </div>
+          <button id="btnCart" class="relative px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">
+            장바구니
+            <span id="cartBadge" class="absolute -top-2 -right-2 min-w-[20px] h-5 px-1 rounded-full bg-sky-500 text-white text-xs grid place-items-center hidden">0</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="md:hidden flex items-center gap-2">
+        <button id="btnSearchMobile" class="rounded-lg border border-slate-200 p-2 hover:bg-slate-50" aria-label="검색 열기">🔍</button>
+        <button id="btnLoginMobile" class="rounded-lg border border-slate-200 p-2 hover:bg-slate-50" aria-label="로그인">😀</button>
+        <button id="btnCartMobile" class="relative rounded-lg border border-slate-200 p-2 hover:bg-slate-50" aria-label="장바구니">
+          🛒
+          <span id="cartBadgeMobile" class="absolute -top-1 -right-1 min-w-[18px] h-4 px-1 rounded-full bg-sky-500 text-white text-[10px] grid place-items-center hidden">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap gap-2">
+        <a href="3.html" class="cat-btn px-3 py-1.5 rounded-lg text-sm" role="button">전체</a>
+        <a href="4.html" class="cat-btn px-3 py-1.5 rounded-lg text-sm" role="상의">상의</a>
+        <a href="5.html" class="cat-btn px-3 py-1.5 rounded-lg text-sm" role="하의">하의</a>
+        <a href="7.html" class="cat-btn px-3 py-1.5 rounded-lg text-sm" role="아우터">아우터</a>
+        <a href="6.html" class="cat-btn px-3 py-1.5 rounded-lg text-sm" role="신발">신발</a>
+        <a href="10.html" class="cat-btn px-3 py-1.5 rounded-lg text-sm" role="가방">가방</a>
+      </div>
+      <div id="searchMobileWrap" class="hidden px-4 pb-3">
+        <input id="searchMobile" type="search" placeholder="검색어를 입력하세요" class="w-full rounded-xl input px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400">
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-emerald-50"></div>
+    <div class="max-w-7xl mx-auto px-4 py-14 md:py-20 relative">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-black leading-tight">당신의 옷이 <span class="text-[var(--accent)]">누군가의 희망</span>이 됩니다</h1>
+          <p class="mt-4 text-slate-600 text-lg">기부받은 빈티지 옷을 판매하고, 수익의 <b>70%</b>를 사회에 기부합니다.</p>
+          <div class="mt-6 flex gap-3">
+            <a href="#shop" class="px-5 py-3 rounded-xl bg-slate-900 text-white hover:bg-slate-800">상품 보러가기</a>
+            <a href="#donate" class="px-5 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50">기부 안내 보기</a>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="aspect-[4/3] rounded-2xl overflow-hidden shadow border border-slate-200 bg-white grid place-items-center">
+            <div class="p-8 text-center">
+              <div class="text-7xl">👕</div>
+              <p class="mt-4 text-slate-700 font-semibold">Donated → Sold → 70% Donated</p>
+              <p class="text-slate-500 text-sm mt-1">기부와 순환의 선한 영향력</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How -->
+  <section id="how" class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-2xl md:text-3xl font-black">운영 방식</h2>
+      <div class="mt-6 grid md:grid-cols-4 gap-5">
+        <div class="card bg-white p-6 rounded-2xl border border-slate-200"><div class="text-3xl">🎁</div><h3 class="mt-3 font-bold">옷 기부</h3><p class="text-slate-600 text-sm">사용하지 않는 옷을 보내주세요.</p></div>
+        <div class="card bg-white p-6 rounded-2xl border border-slate-200"><div class="text-3xl">🧵</div><h3 class="mt-3 font-bold">케어 & 촬영</h3><p class="text-slate-600 text-sm">세탁 후 촬영합니다.</p></div>
+        <div class="card bg-white p-6 rounded-2xl border border-slate-200"><div class="text-3xl">🛍️</div><h3 class="mt-3 font-bold">판매</h3><p class="text-slate-600 text-sm">온라인 숍에서 판매합니다.</p></div>
+        <div class="card bg-white p-6 rounded-2xl border border-slate-200"><div class="text-3xl">🤝</div><h3 class="mt-3 font-bold">70% 기부</h3><p class="text-slate-600 text-sm">매출의 70%를 기부합니다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shop -->
+  <section id="shop" class="py-16 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-end justify-between gap-4">
+        <div><h2 class="text-2xl md:text-3xl font-black">상품 미리보기</h2></div>
+      </div>
+      <div class="mt-3 text-sm text-slate-500" id="resultInfo"></div>
+      <div class="mt-6 grid-auto" id="productGrid"></div>
+    </div>
+  </section>
+
+  <!-- Donate CTA -->
+  <section id="donate" class="py-16 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8 items-center">
+      <div class="md:col-span-2">
+        <h2 class="text-2xl md:text-3xl font-black">옷 기부로 함께해요</h2>
+        <p class="mt-2 text-slate-300">택배 수거 또는 오프라인 방문 접수 가능합니다.</p>
+        <form id="donorForm" class="mt-6 grid md:grid-cols-3 gap-3">
+          <input required type="text" placeholder="이름" class="px-3 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/60">
+          <input required type="tel" placeholder="연락처" class="px-3 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/60">
+          <input required type="text" placeholder="수거 주소 또는 방문 지점" class="px-3 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/60 md:col-span-2">
+          <button class="px-4 py-2 rounded-lg bg-[var(--accent)] text-white md:col-span-1">신청하기</button>
+        </form>
+        <p id="donorThanks" class="hidden mt-3 text-emerald-300">신청이 저장되었습니다! 빠르게 연락드릴게요 🙌</p>
+      </div>
+      <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+        <h3 class="font-bold">기부 안내</h3>
+        <ul class="mt-3 text-sm text-slate-300 list-disc list-inside leading-6">
+          <li>상태 양호/세탁 가능 품목 위주로 받아요.</li>
+          <li>브랜드/시즌 관계없이 컨디션 중심 선별.</li>
+          <li>판매가의 70%는 월별로 모아 기부합니다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 로그인/회원가입 모달 (생략 가능) -->
+
+  <!-- Cart Drawer -->
+  <div id="cartDrawerBackdrop" class="fixed inset-0 bg-black/30 hidden z-40"></div>
+  <aside id="cartDrawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 z-50 drawer-enter transition-transform duration-200">
+    <div class="h-full flex flex-col">
+      <header class="flex items-center justify-between p-4 border-b border-slate-200">
+        <h3 class="text-lg font-bold">장바구니</h3>
+        <button id="cartClose" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">닫기 ✕</button>
+      </header>
+      <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+      <footer class="p-4 border-t border-slate-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-slate-600">합계</span>
+          <strong id="cartTotal" class="text-lg">₩0</strong>
+        </div>
+        <div class="flex gap-2">
+          <button id="btnShareCart" class="w-1/2 px-4 py-2 rounded-xl border border-slate-200">공유 링크 복사</button>
+          <button id="cartCheckout" class="w-1/2 px-4 py-2 rounded-xl bg-slate-900 text-white disabled:opacity-40" disabled>결제하기</button>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">* PortOne 채널키 기반 결제창(테스트)만 호출합니다.</p>
+      </footer>
+    </div>
+  </aside>
+
+  <script>
+    const fmt = n => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
+
+    // -----------------------------
+    // 상품 데이터 (변경 없음)
+    // -----------------------------
+    const products = [
+      { id:'p01', cat:'하의',  name:'네이비 반바지',                 price:12000, img:'반바지-removebg-preview.png' },
+      { id:'p02', cat:'상의',  name:'나이키 버튼업 셔츠',             price:32000, img:'KakaoTalk_20250919_130010848.png' },
+      { id:'p03', cat:'상의',  name:'그레이 집업 후디',               price:28000, img:'KakaoTalk_20250919_130038769.png' },
+      { id:'p04', cat:'하의',  name:'POLE 레이싱 팬츠',               price:35000, img:'KakaoTalk_20250919_130058468.png' },
+      { id:'p05', cat:'아우터',name:'POLE 레이싱 자켓',               price:54000, img:'KakaoTalk_20250919_130112206.png' },
+      { id:'p06', cat:'가방',  name:'COACH 미니 크로스백',            price:65000, img:'고치_가방-removebg-preview.png' },
+      { id:'p07', cat:'신발',  name:'나이키 에어포스 1 화이트',        price:39000, img:'나이키_신발2-removebg-preview.png' },
+      { id:'p08', cat:'상의',  name:'노스페이스 후드 집업',           price:42000, img:'노스페이스_아우터-removebg-preview.png' },
+      { id:'p09', cat:'하의',  name:'블랙 워싱 데님 팬츠',            price:25000, img:'데님_바지-removebg-preview.png' },
+      { id:'p10', cat:'아우터',name:'ZARA 데님 자켓',                 price:47000, img:'데님-removebg-preview.png' },
+      { id:'p11', cat:'신발',  name:'나이키 빈티지 러너 (블루 스우시)', price:36000, img:'나이키_신발-removebg-preview.png' },
+      { id:'p12', cat:'가방',  name:'KANGOL 데님 토트백',            price:23000, img:'캉골_가방-removebg-preview.png' },
+      { id:'p13', cat:'가방',  name:'PUMA 데이팩 백팩',              price:27000, img:'퓨마_가방-removebg-preview.png' },
+    ];
+
+    // -----------------------------
+    // 상태 & 스토리지
+    // -----------------------------
+    let CURRENT_CAT = 'all';
+    let query = '';
+    let minPrice = null;
+    let maxPrice = null;
+    let sortBy = 'relevance';
+
+    const CART_KEY = 'cart-v1';
+    const AUTH_KEY = 'authUser-v1';
+    const USERS_KEY = 'users-v1';
+
+    const loadCart  = () => { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; } };
+    const saveCart  = (c) => localStorage.setItem(CART_KEY, JSON.stringify(c));
+    const loadUser  = () => { try { return JSON.parse(localStorage.getItem(AUTH_KEY)) || null; } catch { return null; } };
+    const saveUser  = (u) => localStorage.setItem(AUTH_KEY, JSON.stringify(u));
+    const clearUser = () => localStorage.removeItem(AUTH_KEY);
+    const loadUsers = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch { return []; } };
+    const saveUsers = (arr) => localStorage.setItem(USERS_KEY, JSON.stringify(arr));
+
+    // -----------------------------
+    // 렌더링
+    // -----------------------------
+    function productCard(p){
+      return `
+      <article class="card bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="aspect-[4/5] bg-slate-100 overflow-hidden">
+          <img loading="lazy" src="${p.img}" alt="${p.name}" class="w-full h-full object-cover"/>
+        </div>
+        <div class="p-4">
+          <div class="text-xs text-slate-500">${p.cat}</div>
+          <h4 class="font-semibold mt-0.5 line-clamp-1">${p.name}</h4>
+          <div class="mt-2 flex items-center justify-between gap-2">
+            <span class="font-bold">₩${fmt(p.price)}</span>
+            <button class="addCart px-3 py-1.5 rounded-lg bg-slate-900 text-white text-sm" data-id="${p.id}">장바구니</button>
+          </div>
+        </div>
+      </article>`;
+    }
+
+    function getFiltered(){
+      const q = query.trim().toLowerCase();
+      let list = CURRENT_CAT === 'all' ? [...products] : products.filter(p => p.cat === CURRENT_CAT);
+
+      if (q) list = list.filter(p => (p.name + ' ' + p.cat).toLowerCase().includes(q));
+      if (minPrice != null && minPrice !== '') list = list.filter(p => p.price >= Number(minPrice));
+      if (maxPrice != null && maxPrice !== '') list = list.filter(p => p.price <= Number(maxPrice));
+
+      switch (sortBy) {
+        case 'priceAsc':  list.sort((a,b)=> a.price-b.price); break;
+        case 'priceDesc': list.sort((a,b)=> b.price-a.price); break;
+        case 'nameAsc':   list.sort((a,b)=> a.name.localeCompare(b.name,'ko')); break;
+        case 'nameDesc':  list.sort((a,b)=> b.name.localeCompare(a.name,'ko')); break;
+        default: break;
+      }
+      return list;
+    }
+
+    function renderProducts(){
+      const grid = document.getElementById('productGrid');
+      const list = getFiltered();
+      document.getElementById('resultInfo').textContent = `검색 결과: ${list.length}개`;
+      grid.innerHTML = list.length
+        ? list.map(productCard).join('')
+        : `<div class="col-span-full text-center text-slate-500 py-10">조건에 맞는 상품이 없습니다.</div>`;
+    }
+
+    function setActiveCat(cat){
+      CURRENT_CAT = cat;
+      document.querySelectorAll('[data-cat]').forEach(btn=>{
+        btn.classList.toggle('active', btn.getAttribute('data-cat') === cat);
+      });
+      renderProducts();
+    }
+
+    // -----------------------------
+    // 검색(모바일)
+    // -----------------------------
+    const searchInput = document.getElementById('search');
+    const searchMobile = document.getElementById('searchMobile');
+    const searchMobileWrap = document.getElementById('searchMobileWrap');
+    const btnSearchMobile = document.getElementById('btnSearchMobile');
+
+    btnSearchMobile?.addEventListener('click', ()=>{
+      const hidden = searchMobileWrap.classList.toggle('hidden');
+      if(!hidden) searchMobile.focus();
+    });
+    searchInput?.addEventListener('input', (e)=>{ query = e.target.value; renderProducts(); });
+    searchMobile?.addEventListener('input', (e)=>{ query = e.target.value; renderProducts(); });
+
+    // -----------------------------
+    // Cart
+    // -----------------------------
+    const btnCart = document.getElementById('btnCart');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const cartBackdrop = document.getElementById('cartDrawerBackdrop');
+    const cartClose = document.getElementById('cartClose');
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartCheckout = document.getElementById('cartCheckout');
+    const cartBadge = document.getElementById('cartBadge');
+    const cartBadgeMobile = document.getElementById('cartBadgeMobile');
+    const btnShareCart = document.getElementById('btnShareCart');
+
+    function openCart(){ cartBackdrop.classList.remove('hidden'); cartDrawer.classList.add('drawer-open'); }
+    function closeCart(){ cartBackdrop.classList.add('hidden'); cartDrawer.classList.remove('drawer-open'); }
+
+    function getCart(){ return loadCart(); }
+    function setCart(c){ saveCart(c); updateCartBadges(c); renderCart(); }
+
+    function updateCartBadges(c){
+      const count = c.reduce((s,i)=> s + i.qty, 0);
+      const show = (el) => {
+        if(!el) return;
+        if(count>0){ el.classList.remove('hidden'); el.textContent = count; }
+        else { el.classList.add('hidden'); el.textContent = '0'; }
+      };
+      show(cartBadge); show(cartBadgeMobile);
+    }
+
+    function renderCart(){
+      const c = getCart();
+      if(c.length === 0){
+        cartItems.innerHTML = `<p class="text-slate-500 text-center py-10">장바구니가 비어 있습니다.</p>`;
+        cartTotal.textContent = '₩0';
+        cartCheckout.disabled = true;
+        return;
+      }
+      cartCheckout.disabled = false;
+      cartItems.innerHTML = c.map(item=>{
+        const p = products.find(x=>x.id===item.id);
+        if(!p) return '';
+        return `
+          <div class="flex gap-3 border border-slate-200 rounded-xl p-3">
+            <img src="${p.img}" alt="${p.name}" class="w-20 h-20 object-cover rounded-lg border border-slate-200">
+            <div class="flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="text-xs text-slate-500">${p.cat}</div>
+                  <div class="font-semibold">${p.name}</div>
+                </div>
+                <button class="rm text-slate-500 hover:text-red-600" data-id="${p.id}" aria-label="삭제">삭제</button>
+              </div>
+              <div class="mt-2 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <button class="dec w-8 h-8 rounded-lg border border-slate-300" data-id="${p.id}">-</button>
+                  <span class="min-w-[24px] text-center">${item.qty}</span>
+                  <button class="inc w-8 h-8 rounded-lg border border-slate-300" data-id="${p.id}">+</button>
+                </div>
+                <div class="font-bold">₩${fmt(p.price * item.qty)}</div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      const total = c.reduce((s,i)=>{
+        const p = products.find(x=>x.id===i.id);
+        return s + (p ? p.price * i.qty : 0);
+      },0);
+      cartTotal.textContent = '₩' + fmt(total);
+    }
+
+    function addToCart(id){
+      const c = getCart();
+      const found = c.find(i=>i.id===id);
+      if(found) found.qty += 1;
+      else c.push({id, qty:1});
+      setCart(c);
+    }
+
+    function changeQty(id, delta){
+      const c = getCart();
+      const idx = c.findIndex(i=>i.id===id);
+      if(idx<0) return;
+      c[idx].qty += delta;
+      if(c[idx].qty <= 0) c.splice(idx,1);
+      setCart(c);
+    }
+
+    function removeItem(id){
+      const c = getCart().filter(i=>i.id!==id);
+      setCart(c);
+    }
+
+    function buildCartShareUrl(){
+      const c = getCart();
+      const qs = c.map(i => `${encodeURIComponent(i.id)}:${i.qty}`).join(',');
+      const url = new URL(window.location.href);
+      if(qs) url.searchParams.set('cart', qs);
+      else url.searchParams.delete('cart');
+      return url.toString();
+    }
+
+    // -----------------------------
+    // 간단 Auth (로컬)
+    // -----------------------------
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLoginMobile = document.getElementById('btnLoginMobile');
+    const userBox = document.getElementById('userBox');
+    const helloUser = document.getElementById('helloUser');
+    const btnLogout = document.getElementById('btnLogout');
+
+    // (로그인 모달 DOM 생략 시 관련 함수들도 자동 skip)
+
+    function openLogin(){ /* 모달 열기 생략 */ }
+    function closeLogin(){ /* 모달 닫기 생략 */ }
+    function renderAuth(){
+      const u = loadUser();
+      const loginBtn = document.getElementById('btnLogin');
+      const signupBtn = document.getElementById('btnSignup');
+      if(u){
+        loginBtn?.classList.add('hidden');
+        signupBtn?.classList.add('hidden');
+        userBox?.classList.remove('hidden');
+        helloUser.textContent = `${u.name}님 환영해요!`;
+      }else{
+        loginBtn?.classList.remove('hidden');
+        signupBtn?.classList.remove('hidden');
+        userBox?.classList.add('hidden');
+        helloUser.textContent = '';
+      }
+    }
+
+    // -----------------------------
+    // PortOne 결제 (채널키 적용)
+    // -----------------------------
+    // ⚠️ 여기의 userCode는 테스트로 공개 식별코드를 사용하지만,
+    //    가능하면 네 계정의 imp로 시작하는 "본인 식별코드"를 쓰는 걸 권장.
+    const PORTONE_USER_CODE = 'imp10391932'; // 필요 시 너의 imp코드로 교체
+    const CHANNEL_KEY = 'channel-key-bfb4d555-3b0d-4675-943f-ef21a3b39939'; // tlgdacomxpay가 묶인 채널
+
+    (function initIMP(){
+      if (!window.IMP) { alert('결제 SDK 로드 실패'); return; }
+      window.IMP.init(PORTONE_USER_CODE);
+    })();
+
+    function calcCartSummary(){
+      const c = loadCart();
+      const items = c.map(({id, qty})=>{
+        const p = products.find(x=>x.id===id);
+        return p ? {name: p.name, qty, price: p.price} : null;
+      }).filter(Boolean);
+
+      const total = items.reduce((s,i)=> s + i.price * i.qty, 0);
+      let orderName = '';
+      if(items.length === 1) orderName = `${items[0].name}`;
+      else if(items.length > 1) orderName = `${items[0].name} 외 ${items.length-1}건`;
+      else orderName = '장바구니 결제';
+      return { total, orderName, items };
+    }
+
+    // ★ 채널키로 결제창 호출 (MID는 채널 설정에 이미 매핑됨)
+    function requestPayment(){
+      const { total, orderName } = calcCartSummary();
+      if(total <= 0){ alert('장바구니가 비어 있습니다.'); return; }
+
+      const user = loadUser();
+      const buyer_name  = user?.name || '비회원';
+      const buyer_email = user?.email || 'guest@example.com';
+      const buyer_tel   = '010-0000-0000'; // 일부 PG 필수
+      const merchant_uid = 'mid_' + Date.now();
+
+      const IMP = window.IMP;
+      IMP.request_pay({
+        channelKey: CHANNEL_KEY,     // ← 핵심(여기에 tlgdacomxpay가 연결됨)
+        pay_method: 'card',
+        merchant_uid,
+        name: orderName,
+        amount: total,
+        buyer_name,
+        buyer_email,
+        buyer_tel,
+        m_redirect_url: location.href // 모바일 리디렉션
+      }, function(rsp){
+        if(rsp.success){
+          // 테스트: 서버검증 생략
+          saveCart([]); renderCart(); updateCartBadges([]);
+          alert('결제가 완료되었습니다. (테스트)\nimp_uid: ' + (rsp.imp_uid || 'N/A'));
+        }else{
+          alert('결제가 취소/실패했습니다.\n사유: ' + rsp.error_msg);
+          console.error('[IMP Error]', rsp);
+        }
+      });
+    }
+
+    // -----------------------------
+    // 이벤트 바인딩
+    // -----------------------------
+    document.addEventListener('click', (e)=>{
+      const add = e.target.closest('.addCart');
+      if(add){ addToCart(add.getAttribute('data-id')); }
+    });
+
+    document.getElementById('btnCart')?.addEventListener('click', openCart);
+    document.getElementById('btnCartMobile')?.addEventListener('click', openCart);
+    document.getElementById('cartClose')?.addEventListener('click', closeCart);
+    document.getElementById('cartDrawerBackdrop')?.addEventListener('click', closeCart);
+
+    document.getElementById('cartItems').addEventListener('click', (e)=>{
+      const inc = e.target.closest('.inc');
+      const dec = e.target.closest('.dec');
+      const rm  = e.target.closest('.rm');
+      if(inc){ changeQty(inc.getAttribute('data-id'), +1); }
+      if(dec){ changeQty(dec.getAttribute('data-id'), -1); }
+      if(rm){ removeItem(rm.getAttribute('data-id')); }
+    });
+
+    document.getElementById('btnShareCart')?.addEventListener('click', async ()=>{
+      const url = buildCartShareUrl();
+      try { await navigator.clipboard.writeText(url); alert('공유 링크가 복사되었습니다!'); }
+      catch { prompt('복사할 링크:', url); }
+    });
+
+    // 결제 버튼 연결
+    document.getElementById('cartCheckout')?.addEventListener('click', requestPayment);
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    setActiveCat('all');
+    renderProducts();
+    renderCart();
+    renderAuth();
+    updateCartBadges(loadCart());
+  </script>
+</body>
+</html>

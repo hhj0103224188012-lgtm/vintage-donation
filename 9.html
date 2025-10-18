@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>상품 상세 - 빈티지 기부</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{--accent:#0ea5e9}
+  .input{border:1px solid rgb(203 213 225)}
+  .chip{border:1px solid rgb(226 232 240)}
+  .drawer-enter{transform:translateX(100%)} .drawer-open{transform:translateX(0)}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-[auto,1fr,auto] items-center gap-3">
+    <a href="1.html" class="flex items-center gap-2">
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white font-bold">V</span>
+      <span class="font-extrabold text-xl">빈티지 기부</span>
+    </a>
+    <div></div>
+    <nav class="hidden md:flex flex-col gap-1 items-end text-sm">
+      <div class="flex items-center gap-2">
+        <a href="3.html#shop" class="px-3 py-1.5 rounded-lg hover:bg-slate-100">상품</a>
+        <a href="3.html#donate" class="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white hover:opacity-90">옷 기부하기</a>
+        <a href="2.html" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">기부현황 보기</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnLogin"  class="chip px-3 py-1.5 rounded-lg">로그인</button>
+        <button id="btnSignup" class="chip px-3 py-1.5 rounded-lg">회원가입</button>
+        <div id="userBox" class="hidden items-center gap-2">
+          <span id="helloUser" class="text-slate-600"></span>
+          <button id="btnLogout" class="chip px-3 py-1.5 rounded-lg">로그아웃</button>
+        </div>
+        <button id="btnCart" class="chip px-3 py-1.5 rounded-lg relative">
+          장바구니 <span id="cartBadge" class="absolute -top-2 -right-2 min-w-[20px] h-5 px-1 rounded-full bg-sky-500 text-white text-xs grid place-items-center hidden">0</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-10">
+  <button id="backBtn" class="mb-6 text-slate-600 hover:text-slate-900">&larr; 목록으로</button>
+  <div class="grid md:grid-cols-2 gap-8">
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 grid place-items-center">
+      <img id="pImg" src="" alt="" class="max-h-[520px] object-contain">
+    </div>
+    <div>
+      <div class="text-sm text-slate-500" id="pCat"></div>
+      <h1 id="pName" class="text-2xl md:text-3xl font-black mt-1"></h1>
+      <div id="pPrice" class="text-2xl font-extrabold mt-3"></div>
+
+      <div class="mt-6">
+        <h3 class="font-semibold mb-2">수량</h3>
+        <div class="inline-flex items-center gap-2">
+          <button id="dec" class="w-9 h-9 rounded-lg border border-slate-300">-</button>
+          <span id="qty" class="min-w-[28px] text-center">1</span>
+          <button id="inc" class="w-9 h-9 rounded-lg border border-slate-300">+</button>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-3">
+        <button id="addCart" class="px-5 py-3 rounded-xl bg-slate-900 text-white">장바구니 담기</button>
+        <button id="goCart" class="px-5 py-3 rounded-xl border border-slate-200">장바구니 보기</button>
+      </div>
+
+      <div class="mt-8 text-sm text-slate-600 leading-6">
+        <p>* 데모용 상세페이지입니다. 실제 결제는 제공되지 않습니다.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Cart Drawer -->
+<div id="cartDrawerBackdrop" class="fixed inset-0 bg-black/30 hidden z-40"></div>
+<aside id="cartDrawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 z-50 drawer-enter transition-transform duration-200 flex flex-col">
+  <header class="flex items-center justify-between p-4 border-b border-slate-200">
+    <h3 class="text-xl font-bold">장바구니</h3>
+    <button id="cartClose" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">닫기 ✕</button>
+  </header>
+  <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+  <footer class="sticky bottom-0 bg-white border-t border-slate-200 p-4">
+    <div class="flex items-center justify-between mb-3"><span class="text-slate-600">합계</span><strong id="cartTotal" class="text-lg">₩0</strong></div>
+    <div class="flex gap-3">
+      <button id="btnShareCart" class="flex-1 h-11 rounded-xl border border-slate-200">공유 링크 복사</button>
+      <button id="cartCheckout" class="flex-1 h-11 rounded-xl bg-slate-900 text-white disabled:opacity-40" disabled>결제(데모)</button>
+    </div>
+    <p class="text-xs text-slate-500 mt-2">* 데모 UI (결제/서버 없음)</p>
+  </footer>
+</aside>
+
+<!-- 로그인/회원가입/아이디찾기/비번재설정 모달 (7.html과 동일) -->
+<div id="loginBackdrop" class="fixed inset-0 bg-black/40 hidden z-50"></div>
+<div id="loginModal" class="fixed inset-0 z-50 hidden p-4 grid place-items-center">
+  <form id="loginForm" class="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="text-xl font-bold mb-4">로그인</h3>
+    <label class="text-xs text-slate-500">이메일</label>
+    <input id="loginEmail" type="email" class="w-full mb-3 px-4 py-2 rounded-lg input" required>
+    <label class="text-xs text-slate-500">비밀번호</label>
+    <input id="loginPw" type="password" minlength="6" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="loginErr" class="text-xs text-red-500 mb-2 hidden">이메일 또는 비밀번호가 올바르지 않습니다.</p>
+    <div class="flex items-center justify-between mb-3">
+      <button type="button" id="openFindId" class="text-xs text-sky-600">아이디(이메일) 찾기</button>
+      <button type="button" id="openResetPw" class="text-xs text-sky-600">비밀번호 재설정</button>
+    </div>
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" id="loginCancel" class="px-4 py-2 rounded-lg border border-slate-200">취소</button>
+      <button class="px-4 py-2 rounded-lg bg-[var(--accent)] text-white">로그인</button>
+    </div>
+  </form>
+</div>
+
+<div id="signupBackdrop" class="fixed inset-0 bg-black/40 hidden z-50"></div>
+<div id="signupModal" class="fixed inset-0 z-50 hidden p-4 grid place-items-center">
+  <form id="signupForm" class="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="text-xl font-bold mb-4">회원가입</h3>
+    <label class="text-xs text-slate-500">이름</label>
+    <input id="signupName" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="errSignupName" class="text-xs text-red-500 mb-2 hidden">이름은 2자 이상 입력해주세요.</p>
+    <label class="text-xs text-slate-500">이메일</label>
+    <input id="signupEmail" type="email" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="errSignupEmail" class="text-xs text-red-500 mb-2 hidden">올바른 이메일 형식이 아닙니다.</p>
+    <label class="text-xs text-slate-500">비밀번호</label>
+    <input id="signupPw" type="password" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="errSignupPw" class="text-xs text-red-500 mb-2 hidden">영문/숫자 포함 6자 이상</p>
+    <label class="text-xs text-slate-500">비밀번호 확인</label>
+    <input id="signupPw2" type="password" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="errSignupPw2" class="text-xs text-red-500 mb-2 hidden">비밀번호가 일치하지 않습니다.</p>
+    <p id="errSignupDup" class="text-xs text-red-500 mb-3 hidden">이미 가입된 이메일입니다.</p>
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" id="signupCancel" class="px-4 py-2 rounded-lg border border-slate-200">취소</button>
+      <button class="px-4 py-2 rounded-lg bg-[var(--accent)] text-white">가입하기</button>
+    </div>
+  </form>
+</div>
+
+<div id="findIdBackdrop" class="fixed inset-0 bg-black/40 hidden z-50"></div>
+<div id="findIdModal" class="fixed inset-0 z-50 hidden p-4 grid place-items-center">
+  <form id="findIdForm" class="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="text-xl font-bold mb-4">아이디(이메일) 찾기</h3>
+    <label class="text-xs text-slate-500">가입한 이름</label>
+    <input id="findIdName" class="w-full mb-2 px-4 py-2 rounded-lg input" required>
+    <p id="findIdErr" class="text-xs text-red-500 mb-2 hidden">해당 이름으로 가입된 계정을 찾을 수 없습니다.</p>
+    <div id="findIdResult" class="text-sm text-slate-700 mb-3 hidden"></div>
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" id="findIdCancel" class="px-4 py-2 rounded-lg border border-slate-200">닫기</button>
+      <button class="px-4 py-2 rounded-lg bg-[var(--accent)] text-white">찾기</button>
+    </div>
+  </form>
+</div>
+
+<div id="resetPwBackdrop" class="fixed inset-0 bg-black/40 hidden z-50"></div>
+<div id="resetPwModal" class="fixed inset-0 z-50 hidden p-4 grid place-items-center">
+  <form id="resetPwForm" class="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="text-xl font-bold mb-4">비밀번호 재설정</h3>
+    <label class="text-xs text-slate-500">가입 이메일</label>
+    <input id="resetEmail" type="email" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="resetEmailErr" class="text-xs text-red-500 mb-2 hidden">가입된 이메일이 아닙니다.</p>
+    <label class="text-xs text-slate-500">새 비밀번호</label>
+    <input id="resetPw" type="password" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="resetPwErr" class="text-xs text-red-500 mb-2 hidden">형식이 올바르지 않습니다.</p>
+    <label class="text-xs text-slate-500">새 비밀번호 확인</label>
+    <input id="resetPw2" type="password" class="w-full mb-1 px-4 py-2 rounded-lg input" required>
+    <p id="resetPw2Err" class="text-xs text-red-500 mb-2 hidden">비밀번호가 일치하지 않습니다.</p>
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" id="resetCancel" class="px-4 py-2 rounded-lg border border-slate-200">취소</button>
+      <button class="px-4 py-2 rounded-lg bg-[var(--accent)] text-white">재설정</button>
+    </div>
+  </form>
+</div>
+
+<script>
+/* ===== 제품 데이터(공통) ===== */
+const ALL = [
+  { id:'p01', cat:'하의',  name:'네이비 반바지', price:12000, img:'반바지-removebg-preview.png' },
+  { id:'p02', cat:'상의',  name:'나이키 버튼업 셔츠', price:32000, img:'KakaoTalk_20250919_130010848.png' },
+  { id:'p03', cat:'상의',  name:'그레이 집업 후디',   price:28000, img:'KakaoTalk_20250919_130038769.png' },
+  { id:'p04', cat:'하의',  name:'POLE 레이싱 팬츠',  price:35000, img:'KakaoTalk_20250919_130058468.png' },
+  { id:'p05', cat:'아우터',name:'POLE 레이싱 자켓',  price:54000, img:'KakaoTalk_20250919_130112206.png' },
+  { id:'p06', cat:'가방',  name:'COACH 미니 크로스백', price:65000, img:'고치_가방-removebg-preview.png' },
+  { id:'p07', cat:'신발',  name:'나이키 에어포스 1 화이트', price:39000, img:'나이키_신발2-removebg-preview.png' },
+  { id:'p08', cat:'상의',  name:'노스페이스 후드 집업', price:42000, img:'노스페이스_아우터-removebg-preview.png' },
+  { id:'p09', cat:'하의',  name:'블랙 워싱 데님 팬츠', price:25000, img:'데님_바지-removebg-preview.png' },
+  { id:'p10', cat:'아우터',name:'ZARA 데님 자켓',      price:47000, img:'데님-removebg-preview.png' },
+  { id:'p11', cat:'신발',  name:'나이키 빈티지 러너 (블루 스우시)', price:36000, img:'나이키_신발-removebg-preview.png' },
+  { id:'p12', cat:'가방',  name:'KANGOL 데님 토트백', price:23000, img:'캉골_가방-removebg-preview.png' },
+  { id:'p13', cat:'가방',  name:'PUMA 데이팩 백팩',  price:27000, img:'퓨마_가방-removebg-preview.png' },
+];
+const fmt=n=>n.toLocaleString('ko-KR');
+
+/* 선택 상품 로드 (id 쿼리 또는 sessionStorage) */
+function getSelectedId(){
+  const fromQuery = new URLSearchParams(location.search).get('id');
+  return fromQuery || sessionStorage.getItem('selectedProductId');
+}
+const id = getSelectedId();
+const product = ALL.find(x=>x.id===id) || ALL[0];
+
+document.getElementById('pImg').src = product.img;
+document.getElementById('pImg').alt = product.name;
+document.getElementById('pName').textContent = product.name;
+document.getElementById('pCat').textContent = product.cat;
+document.getElementById('pPrice').textContent = '₩'+fmt(product.price);
+
+/* 수량 */
+let qty=1; const qtyEl=document.getElementById('qty');
+document.getElementById('inc').addEventListener('click',()=>{qty++; qtyEl.textContent=qty;});
+document.getElementById('dec').addEventListener('click',()=>{qty=Math.max(1,qty-1); qtyEl.textContent=qty;});
+
+/* 목록으로 */
+document.getElementById('backBtn').addEventListener('click',()=>{
+  const url=sessionStorage.getItem('prevListURL')||'3.html#shop';
+  location.href=url;
+});
+
+/* ===== 장바구니 ===== */
+const CART_KEY='cart-v1';
+const loadCart=()=>{try{return JSON.parse(localStorage.getItem(CART_KEY))||[]}catch{return[]}};
+const saveCart=c=>localStorage.setItem(CART_KEY, JSON.stringify(c));
+const cartDrawer=document.getElementById('cartDrawer');
+const cartBackdrop=document.getElementById('cartDrawerBackdrop');
+const cartItems=document.getElementById('cartItems');
+const cartTotal=document.getElementById('cartTotal');
+const cartCheckout=document.getElementById('cartCheckout');
+const cartBadge=document.getElementById('cartBadge');
+
+const openCart=()=>{cartBackdrop.classList.remove('hidden');cartDrawer.classList.add('drawer-open');renderCart();};
+const closeCart=()=>{cartBackdrop.classList.add('hidden');cartDrawer.classList.remove('drawer-open');};
+document.getElementById('btnCart').addEventListener('click', openCart);
+document.getElementById('cartClose').addEventListener('click', closeCart);
+cartBackdrop.addEventListener('click', closeCart);
+
+function updateBadge(){
+  const n=loadCart().reduce((s,i)=>s+i.qty,0);
+  if(!cartBadge) return;
+  if(n>0){ cartBadge.classList.remove('hidden'); cartBadge.textContent=n; }
+  else { cartBadge.classList.add('hidden'); cartBadge.textContent='0'; }
+}
+
+function renderCart(){
+  const c=loadCart();
+  if(!c.length){
+    cartItems.innerHTML='<p class="text-slate-500 text-center py-10">장바구니가 비어 있습니다.</p>';
+    cartTotal.textContent='₩0'; cartCheckout.disabled=true; updateBadge(); return;
+  }
+  cartCheckout.disabled=false;
+  cartItems.innerHTML=c.map(it=>{
+    const p=ALL.find(x=>x.id===it.id)||it;
+    return `
+    <div class="flex gap-3 border border-slate-200 rounded-xl p-3">
+      <img src="${p.img||''}" alt="${p.name}" class="w-20 h-20 object-cover rounded-lg border">
+      <div class="flex-1">
+        <div class="flex items-start justify-between">
+          <div><div class="text-xs text-slate-500">${p.cat||''}</div><div class="font-semibold">${p.name}</div></div>
+          <button class="rm text-slate-500 hover:text-red-600" data-id="${p.id}">삭제</button>
+        </div>
+        <div class="mt-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button class="dec w-8 h-8 rounded-lg border border-slate-300" data-id="${p.id}">-</button>
+            <span class="min-w-[24px] text-center">${it.qty}</span>
+            <button class="inc w-8 h-8 rounded-lg border border-slate-300" data-id="${p.id}">+</button>
+          </div>
+          <div class="font-bold">₩${fmt((p.price||0)*it.qty)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const total=c.reduce((s,i)=>{const p=ALL.find(x=>x.id===i.id)||{price:0}; return s+p.price*i.qty;},0);
+  cartTotal.textContent='₩'+fmt(total); updateBadge();
+}
+
+function changeQty(id,d){const c=loadCart(); const i=c.findIndex(x=>x.id===id); if(i<0) return; c[i].qty+=d; if(c[i].qty<=0) c.splice(i,1); saveCart(c); renderCart();}
+function removeItem(id){saveCart(loadCart().filter(i=>i.id!==id)); renderCart();}
+
+cartItems.addEventListener('click', e=>{
+  const inc=e.target.closest('.inc'), dec=e.target.closest('.dec'), rm=e.target.closest('.rm');
+  if(inc) changeQty(inc.dataset.id,1);
+  if(dec) changeQty(dec.dataset.id,-1);
+  if(rm) removeItem(rm.dataset.id);
+});
+
+document.getElementById('btnShareCart').addEventListener('click', async ()=>{
+  const qs=loadCart().map(i=>`${encodeURIComponent(i.id)}:${i.qty}`).join(',');
+  const url=new URL(location.href);
+  if(qs) url.searchParams.set('cart',qs); else url.searchParams.delete('cart');
+  try{await navigator.clipboard.writeText(url.toString()); alert('공유 링크가 복사되었습니다!');}
+  catch{prompt('복사할 링크:', url.toString());}
+});
+
+document.getElementById('cartCheckout').addEventListener('click', ()=>alert('데모 결제입니다.'));
+
+document.getElementById('addCart').addEventListener('click', ()=>{
+  const c=loadCart(); const f=c.find(i=>i.id===product.id);
+  if(f) f.qty+=qty; else c.push({id:product.id, qty});
+  saveCart(c); updateBadge(); openCart();
+});
+document.getElementById('goCart').addEventListener('click', openCart);
+
+/* ===== 인증(로컬) — 7.html과 동일 ===== */
+const AUTH_KEY='authUser-v1', USERS_KEY='users-v1';
+const loadUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY))||null}catch{return null}};
+const saveUser=u=>localStorage.setItem(AUTH_KEY, JSON.stringify(u));
+const clearUser=()=>localStorage.removeItem(AUTH_KEY);
+const loadUsers=()=>{try{return JSON.parse(localStorage.getItem(USERS_KEY))||[]}catch{return []}};
+const saveUsers=a=>localStorage.setItem(USERS_KEY, JSON.stringify(a));
+function renderAuth(){
+  const u=loadUser();
+  const login=document.getElementById('btnLogin');
+  const signup=document.getElementById('btnSignup');
+  const box=document.getElementById('userBox');
+  const hello=document.getElementById('helloUser');
+  if(u){login.classList.add('hidden'); signup.classList.add('hidden'); box.classList.remove('hidden'); hello.textContent=`${u.name}님 환영해요!`;}
+  else {login.classList.remove('hidden'); signup.classList.remove('hidden'); box.classList.add('hidden'); hello.textContent='';}
+}
+const EMAIL_RX=/^[^\s@]+@[^\s@]+\.[^\s@]+$/, PW_RX=/^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+const LB=document.getElementById('loginBackdrop'), LM=document.getElementById('loginModal');
+const SB=document.getElementById('signupBackdrop'), SM=document.getElementById('signupModal');
+const FB=document.getElementById('findIdBackdrop'), FM=document.getElementById('findIdModal');
+const RB=document.getElementById('resetPwBackdrop'), RM=document.getElementById('resetPwModal');
+const openM=(B,M)=>{B.classList.remove('hidden');M.classList.remove('hidden');}
+const closeM=(B,M)=>{B.classList.add('hidden');M.classList.add('hidden');}
+document.getElementById('btnLogin').addEventListener('click',()=>openM(LB,LM));
+document.getElementById('loginCancel').addEventListener('click',()=>closeM(LB,LM)); LB.addEventListener('click',()=>closeM(LB,LM));
+document.getElementById('btnSignup').addEventListener('click',()=>openM(SB,SM));
+document.getElementById('signupCancel').addEventListener('click',()=>closeM(SB,SM)); SB.addEventListener('click',()=>closeM(SB,SM));
+document.getElementById('openFindId').addEventListener('click',()=>{closeM(LB,LM);openM(FB,FM);});
+document.getElementById('findIdCancel').addEventListener('click',()=>closeM(FB,FM)); FB.addEventListener('click',()=>closeM(FB,FM));
+document.getElementById('openResetPw').addEventListener('click',()=>{closeM(LB,LM);openM(RB,RM);});
+document.getElementById('resetCancel').addEventListener('click',()=>closeM(RB,RM)); RB.addEventListener('click',()=>closeM(RB,RM));
+document.getElementById('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pw=document.getElementById('loginPw').value.trim();
+  const users=loadUsers(); const found=users.find(u=>u.email.toLowerCase()===email);
+  if(!found || found.pw!==pw){document.getElementById('loginErr').classList.remove('hidden'); return;}
+  saveUser({name:found.name,email:found.email}); closeM(LB,LM); renderAuth();
+});
+document.getElementById('signupForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=document.getElementById('signupName').value.trim();
+  const email=document.getElementById('signupEmail').value.trim().toLowerCase();
+  const pw=document.getElementById('signupPw').value.trim();
+  const pw2=document.getElementById('signupPw2').value.trim();
+  const dup=loadUsers().find(u=>u.email.toLowerCase()===email);
+  const bad=name.length<2 || !EMAIL_RX.test(email) || !PW_RX.test(pw) || pw!==pw2 || !!dup;
+  document.getElementById('errSignupName').classList.toggle('hidden', !(name.length<2));
+  document.getElementById('errSignupEmail').classList.toggle('hidden', EMAIL_RX.test(email));
+  document.getElementById('errSignupPw').classList.toggle('hidden', PW_RX.test(pw));
+  document.getElementById('errSignupPw2').classList.toggle('hidden', pw===pw2);
+  document.getElementById('errSignupDup').classList.toggle('hidden', !dup);
+  if(bad) return;
+  const users=loadUsers(); users.push({name,email,pw}); saveUsers(users); saveUser({name,email});
+  closeM(SB,SM); renderAuth(); alert('가입이 완료되었습니다!');
+});
+document.getElementById('findIdForm').addEventListener('submit',e=>{
+  e.preventDefault(); const name=document.getElementById('findIdName').value.trim().toLowerCase(); const matches=loadUsers().filter(u=>u.name.toLowerCase()===name);
+  const err=document.getElementById('findIdErr'), box=document.getElementById('findIdResult');
+  if(!matches.length){err.classList.remove('hidden'); box.classList.add('hidden'); box.innerHTML=''; return;}
+  err.classList.add('hidden'); box.classList.remove('hidden');
+  const mask=em=>{const [id,dm]=em.split('@'); const m=id.length<=2?id[0]+'*':id[0]+'*'.repeat(Math.max(id.length-2,1))+id.slice(-1); return m+'@'+dm;}
+  box.innerHTML=matches.map((u,i)=>`<div class="mb-1">계정 ${i+1}: <b>${mask(u.email)}</b></div>`).join('');
+});
+document.getElementById('resetPwForm').addEventListener('submit',e=>{
+  e.preventDefault(); const email=document.getElementById('resetEmail').value.trim().toLowerCase(); const p1=document.getElementById('resetPw').value.trim(); const p2=document.getElementById('resetPw2').value.trim();
+  const users=loadUsers(); const idx=users.findIndex(u=>u.email.toLowerCase()===email);
+  const emailOk=idx>=0, pwOk=/^(?=.*[A-Za-z])(?=.*\d).{6,}$/.test(p1), same=p1===p2;
+  document.getElementById('resetEmailErr').classList.toggle('hidden', emailOk);
+  document.getElementById('resetPwErr').classList.toggle('hidden', pwOk);
+  document.getElementById('resetPw2Err').classList.toggle('hidden', same);
+  if(!(emailOk&&pwOk&&same)) return; users[idx].pw=p1; saveUsers(users); alert('비밀번호가 변경되었습니다.'); closeM(RB,RM);
+});
+
+window.addEventListener('load',()=>{ renderAuth(); updateBadge(); });
+</script>
+</body>
+</html>

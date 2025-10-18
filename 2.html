@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>기부 현황 | 빈티지 기부</title>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    html,body { font-family: 'Pretendard', sans-serif; background-color: #f9fafb; }
+    .card { transition: .3s ease; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,.08); }
+    :root { --accent:#0ea5e9; }
+    .cat-btn { border:1px solid rgb(226 232 240); }
+    .cat-btn.active { background:var(--accent); color:#fff; border-color:transparent; }
+  </style>
+</head>
+<body class="text-slate-900">
+
+  <!-- Header (메인과 동일) -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- Left: Logo -->
+      <a href="1.html" class="flex items-center gap-2">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)] text-white font-bold">V</span>
+        <span class="font-extrabold tracking-tight text-xl">빈티지 기부</span>
+      </a>
+
+      <!-- Right: Nav -->
+      <nav class="hidden md:flex items-center gap-4 text-sm">
+        <a href="1.html#how" class="px-3 py-1.5 rounded-lg hover:bg-slate-100">운영 방식</a>
+        <a href="1.html#shop" class="px-3 py-1.5 rounded-lg hover:bg-slate-100">상품</a>
+        <a href="1.html#donate" class="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white hover:opacity-90">옷 기부하기</a>
+        <a href="2.html" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-900 text-white">기부현황 보기</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main (기부 현황 페이지 내용) -->
+  <main class="max-w-6xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-black mb-6">기부 현황 (Transparency)</h1>
+    <p class="text-slate-600 mb-10">
+      지금까지의 기부 내역을 확인하세요. 모든 내역은 로컬에 저장되며, 판매 수익의 70%가 기부됩니다.
+    </p>
+
+    <!-- Summary -->
+    <div class="grid md:grid-cols-3 gap-4 mb-10">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <p class="text-sm text-slate-500">누적 매출</p>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <p class="text-sm text-slate-500">누적 기부(70%)</p>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <p class="text-sm text-slate-500">운영비(30%)</p>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 overflow-x-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold">기부 내역</h2>
+        
+      </div>
+      <table class="min-w-[720px] w-full text-sm">
+        <thead>
+          <tr class="text-left text-slate-500">
+            <th class="py-2">날짜</th>
+            <th class="py-2">기관</th>
+            <th class="py-2">메모</th>
+            <th class="py-2">금액</th>
+            <th class="py-2">영수증</th>
+          </tr>
+        </thead>
+        <tbody id="donationBody">
+          <!-- 데이터가 JS로 삽입될 수 있음 -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+
+</body>
+</html>
